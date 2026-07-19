@@ -1,0 +1,113 @@
+===============================================================================
+                     DEMİR TAKİP VE ERP PROGRAMI KULLANIM KILAVUZU
+                   (İlkokul Çağındaki Bir Çocuğa Anlatır Gibi!)
+===============================================================================
+
+Merhaba! Bu kitapçık, bilgisayarındaki "Demir Takip ve ERP" isimli akıllı programı
+nasıl çalıştıracağını ve onunla nasıl harika işler yapacağını sana çok basit bir
+şekilde anlatacak. Hazırsan başlayalım!
+
+-------------------------------------------------------------------------------
+1. BÖLÜM: BU PROGRAM NEDİR VE NE İŞE YARAR?
+-------------------------------------------------------------------------------
+Bu program, senin koca koca inşaat demirlerini, müşterilerini, satıcılarını,
+paralarını ve banka borçlarını düzenli tutmanı sağlayan dijital bir oyuncak sandığı
+gibidir. Hangi demirden depoda kaç kilo kalmış, kime ne kadar borcumuz var,
+hepsini bu akıllı sandık sayesinde görebilirsin.
+
+-------------------------------------------------------------------------------
+2. BÖLÜM: PROGRAMI BİLGİSAYARDA NASIL ÇALIŞTIRIRIZ? (KURULUM)
+-------------------------------------------------------------------------------
+Bu programı çalıştırmak için internette bir web sitesine gitmene gerek yok. Her şey
+senin bilgisayarının içinde! Sadece şu 3 basit adımı takip et:
+
+  1. Adım: Bilgisayarındaki "yapay zeka projeleri" klasörüne gir.
+  2. Adım: Oradaki "siparis-takip-erp" klasörünü aç.
+  3. Adım: Klasörün içindeki "index.html" isimli dosyayı bul ve üzerine farenle
+     iki kere hızlıca tıkla (Çift tıkla).
+
+İşte bu kadar! Program tarayıcında (Chrome, Edge vb.) sihirli bir şekilde açılacak.
+
+*Küçük Bir Not:* Tarayıcının sağ üstündeki geliştirici konsolunda kırmızı renkli
+uyarı yazıları görebilirsin. Bunlar "file://" (dosya) ile çalıştırdığımız için
+tarayıcının gösterdiği zararsız uyarılardır. Korkma, programın çalışmasına hiçbir
+zararı yok!
+
+-------------------------------------------------------------------------------
+3. BÖLÜM: PROGRAMA GİRİŞ YAPALIM (KAPIYI AÇMAK)
+-------------------------------------------------------------------------------
+Program açıldığında karşına renkli kullanıcı kartları çıkacak:
+  * Giriş yapmak için kendi kullanıcı kartına tıkla.
+  * Örneğin temsilci olarak giriş yapmak için:
+    - "Erdem" kartına tıklayıp şifre olarak "2222" yazabilirsin.
+    - Veya "Serdal" kartına tıklayıp şifre olarak "2261" yazabilirsin.
+  * Şifreni yazdıktan sonra "Giriş Yap" butonuna bas ve artık içeridesin!
+
+-------------------------------------------------------------------------------
+4. BÖLÜM: ADIM ADIM KULLANMA OYUNU
+-------------------------------------------------------------------------------
+
+A) YENİ ARKADAŞLAR EKLEMEK (CARİ HESAPLAR)
+Önce ticaret yapacağımız firmaları sisteme tanıtmamız lazım.
+  1. Sol menüden "Firma Carileri" yazan yere tıkla.
+  2. "Yeni Firma" butonuna bas.
+  3. Firmanın adını yaz ve tipini seç:
+     - Demir satacağın kişiler için ➔ "Müşteri" seç.
+     - Demir satın alacağın yerler için ➔ "Tedarikçi" seç.
+     - Kredi kullanacağın bankalar için ➔ "Banka" seç.
+  4. Kaydet butonuna bas. Artık o firma senin arkadaş listende!
+
+B) DEMİR OYUNCAKLARINI TANIMLAMAK (STOK ENVANTERİ)
+Depomuzda hangi demirler olacaksa onları sisteme kaydetmeliyiz.
+  1. Sol menüden "Stok Envanteri" yazan yere git.
+  2. "Yeni Ürün Kartı Aç" butonuna tıkla.
+  3. Ürün adını yaz (Örn: "12' LİK İNŞAAT DEMİRİ").
+  4. Kaydet. Artık o demir türü depomuzda yer kaplamaya hazır!
+
+C) EN EĞLENCELİ KISIM: SİPARİŞ GİRMEK (DEMİR ALIM & SATIM)
+Bir firmayla anlaştın ve demir alacaksın ya da satacaksın:
+  1. Menüden "Yeni Sipariş Girişi" butonuna bas. Dev gibi bir form açılacak.
+  2. "İşlem Türü"nü seç (Satış mı yapıyorsun, Satın Alma mı?).
+  3. "Bağlantı No" kısmına fatura numarasını veya evrak numarasını yaz (Örn: 101101).
+  4. Hangi firmayla ticaret yapıyorsan listeden seç.
+  5. "Kalem Ekle" butonuna basarak istediğin kadar demir satırı ekle:
+     - Ürünü seç (Örn: 8'lik inşaat demiri).
+     - Kaç kilo (kg) olduğunu yaz (Örn: 38540).
+     - Ton fiyatını yaz (Örn: 32800).
+     - KDV'sini %20, Tevkifatını 5/10 (Mamul teslimi) olarak seç.
+  6. En altta program senin için KDV tevkifatını otomatik düşecek ve cari hesaba
+     işlenecek net ödenecek parayı kuruşu kuruşuna gösterecektir.
+  7. "Siparişi Kaydet" butonuna bas!
+     * Sihir burada başlıyor: Depodaki demir miktarın otomatik güncellenir,
+       ticaret yaptığın firmanın cari hesabına borç/alacak otomatik yazılır!
+
+D) BANKA VE MÜRABAHA (BANKADAN BORÇ ALMAK)
+Eğer demir alırken cebinden nakit vermek yerine bankadan katılım kredisi
+(mürabaha) kullanacaksan:
+  1. Sipariş formunda "Finansman Türü"nü "Mürabaha" yap.
+  2. Hangi bankadan kredi kullandığını ve bankanın kâr payını (faizini) yaz.
+  3. Siparişi kaydettiğinde sistem:
+     - Demir aldığın tedarikçiye olan borcunu otomatik kapatır (çünkü banka ödedi).
+     - Senin borcunu ise otomatik olarak seçtiğin bankanın carisine yansıtır.
+     - "Banka & Mürabaha" sayfasında ödeme takvimini oluşturur. Ödeme günü gelince
+       "Öde" butonuna basarak bankaya olan borcunu tık tık kapatabilirsin!
+
+E) HATALARI SİHİRLİ BİR ŞEKİLDE SİLMEK (GERİ ALMAK)
+Eğer yanlış bir şey girersen hiç üzülme!
+  1. "Aktif Siparişler" sayfasına git.
+  2. Hatalı girdiğin siparişin sağındaki kırmızı "Sil" (Çöp Kutusu) butonuna bas.
+  3. Sistem o sipariş yüzünden depodan düşen stokları yerine koyacak, cariye yazılan
+     borçları silecek ve banka kredisini yok edecektir. Her şey eski haline döner!
+
+F) OYUNU BİLGİSAYARA KAYDETMEK (YEDEKLEME)
+İşlerin bittiğinde tüm bu bilgileri bilgisayarına güvenle yedekleyebilirsin:
+  * Profil / Ayarlar kısmından "Yedek İndir" butonuna bas. Tüm veriler bir dosya
+    olarak bilgisayarına iner.
+  * Eğer bilgisayarına bir şey olursa "Yedekten Geri Yükle" diyerek bu dosyayı
+    seçtiğinde buluttaki tüm eski verilerin silinip yerine yedektekiler tertemiz
+    bir şekilde yüklenir.
+
+-------------------------------------------------------------------------------
+Tebrikler! Artık bu akıllı programı nasıl kullanacağını mükemmel biliyorsun.
+Hadi şimdi bilgisayarında çalıştır ve denemeler yap!
+===============================================================================

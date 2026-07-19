@@ -1,0 +1,22 @@
+{
+  "name": "Sipariş Takip & Cari Yönetim Sistemi",
+  "short_name": "Sipariş Takip",
+  "description": "Firma bazlı sipariş, vade takibi, ödeme hatırlatma ve cari hesap yönetim sistemi.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#0284c7",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

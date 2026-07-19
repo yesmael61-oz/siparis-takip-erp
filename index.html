@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipariş Takip ve Ödeme Hatırlatıcı</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK (Compat sürüm - ES Module gerektirmez, direkt çalışır) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- PWA Mobil & Masaüstü Kurulum Ayarları -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+    <!-- 👥 Çoklu Kullanıcı Giriş Ekranı -->
+    <div id="login-screen" class="login-screen-overlay">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i data-lucide="package-check" class="logo-icon"></i>
+                    <span>SİPARİŞ TAKİP</span>
+                </div>
+                <p>Devam etmek için profilinizi seçin</p>
+            </div>
+            
+            <div class="user-profiles" id="profile-list">
+                <!-- JS tarafından doldurulacak -->
+            </div>
+            
+            <!-- 🔑 Şifre Giriş Formu (Başlangıçta Gizli) -->
+            <div id="password-form-area" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:1.5rem; text-align:center;">
+                    <div id="selected-profile-avatar" style="margin-bottom:0.5rem; width:64px; height:64px; border-radius:50%; background:var(--bg-glass-hover); border:1px solid var(--accent-cyan); display:flex; align-items:center; justify-content:center; color:var(--accent-cyan)">
+                        <i id="selected-avatar-icon" data-lucide="user" style="width:32px; height:32px;"></i>
+                    </div>
+                    <strong id="selected-profile-name" style="color:var(--text-primary); font-size:1.1rem; display:block; margin-bottom:0.1rem;">-</strong>
+                    <span id="selected-profile-role" style="color:var(--text-secondary); font-size:0.8rem;">-</span>
+                </div>
+                <form id="login-password-form" style="width: 100%; display: flex; flex-direction: column; gap: 1rem;" onsubmit="UserManager.validatePassword(event)">
+                    <div class="form-group" style="margin-bottom: 0; width:100%;">
+                        <label class="form-label" style="text-align:left;">Giriş Şifresi *</label>
+                        <input type="password" id="login-password-input" class="form-control" placeholder="Şifrenizi yazın..." required>
+                    </div>
+                    <div style="display:flex; gap:10px; width:100%;">
+                        <button type="button" class="btn btn-secondary" style="flex:1;" onclick="UserManager.cancelPassword()">
+                            Geri Dön
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="flex:1; background:linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));">
+                            Giriş Yap
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="login-footer" id="db-status-footer">
+                <i data-lucide="shield"></i> Veritabanı durumu yükleniyor...
+            </div>
+        </div>
+    </div>
+
+    <!-- 🖥️ Ana Uygulama Yapısı -->
+    <div class="app-container" id="app-main" style="display: none;">
+        <!-- Sol Menü (Sidebar) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="package-check" class="logo-icon"></i>
+                    <span>SİPARİŞ TAKİP</span>
+                </div>
+                <div class="subtitle">Bağlantı &amp; Ödeme Yönetimi</div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Özet Panel</span>
+                </a>
+                <a href="#siparisler" class="nav-item" data-page="siparisler">
+                    <i data-lucide="file-text"></i>
+                    <span>Aktif Siparişler</span>
+                </a>
+                <a href="#arsiv" class="nav-item" data-page="arsiv">
+                    <i data-lucide="archive"></i>
+                    <span>Eski İşlemler (Arşiv)</span>
+                </a>
+                <a href="#cariler" class="nav-item" data-page="cariler">
+                    <i data-lucide="users"></i>
+                    <span>Firma Carileri</span>
+                </a>
+                <a href="#bankalar" class="nav-item" data-page="bankalar">
+                    <i data-lucide="landmark"></i>
+                    <span>Banka &amp; Mürabaha</span>
+                </a>
+                <a href="#stok" class="nav-item" data-page="stok">
+                    <i data-lucide="boxes"></i>
+                    <span>Stok Envanteri</span>
+                </a>
+                <a href="#raporlar" class="nav-item" data-page="raporlar">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Raporlar</span>
+                </a>
+                <a href="#kullanicilar" id="nav-kullanicilar" class="nav-item" data-page="kullanicilar" style="display: none;">
+                    <i data-lucide="user-plus"></i>
+                    <span>Kullanıcı Yönetimi</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="active-user-badge">
+                    <div class="user-avatar-small">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <div>
+                        <div class="active-user-name" id="current-user-name">Giriş Yapılmadı</div>
+                        <div class="active-user-role" id="current-user-role">-</div>
+                    </div>
+                    <button class="logout-btn" onclick="App.logout()" title="Profil Değiştir">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Ana İçerik Alanı -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="page-title-area">
+                    <h1 id="current-page-title">Özet Panel</h1>
+                    <p id="current-page-subtitle" class="page-subtitle">Sipariş durumları ve yaklaşan ödeme tarihleri</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" style="padding: 0.5rem 0.8rem; font-size: 0.8rem;" onclick="App.exportBackup()" title="Verileri Bilgisayara Yedekle (JSON)">
+                        <i data-lucide="download" style="width:14px; height:14px;"></i> Yedekle
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 0.5rem 0.8rem; font-size: 0.8rem;" onclick="document.getElementById('import-file').click()" title="Yedek Dosyasından Geri Yükle">
+                        <i data-lucide="upload" style="width:14px; height:14px;"></i> Yedek Yükle
+                    </button>
+                    <button class="btn btn-secondary mobile-logout-btn" onclick="App.logout()" title="Profil Değiştir (Çıkış)">
+                        <i data-lucide="log-out" style="width:14px; height:14px;"></i> Çıkış Yap
+                    </button>
+                    <input type="file" id="import-file" style="display:none;" accept=".json" onchange="App.importBackup(event)">
+                    <div class="date-badge">
+                        <i data-lucide="calendar"></i>
+                        <span id="current-date">--.--.----</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dinamik Sayfa İçeriği -->
+            <div id="page-container" class="page-container">
+                <!-- JS tarafından doldurulacak -->
+            </div>
+        </main>
+    </div>
+
+    <!-- 📝 SİPARİŞ EKLE / DÜZENLE MODALI -->
+    <div id="order-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-box" style="max-width: 950px; width: 95%;">
+            <div class="modal-header">
+                <h3 id="modal-title">Yeni Sipariş Girişi</h3>
+                <button class="modal-close" onclick="App.closeOrderModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                <form id="order-form" onsubmit="App.handleOrderSubmit(event)">
+                    <input type="hidden" id="order-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">İşlem Türü *</label>
+                            <select id="form-islem-turu" class="form-control" onchange="App.onOrderTypeChange()" required>
+                                <option value="Satış">Satış (Müşteriye Satış)</option>
+                                <option value="Satın Alma">Satın Alma (Tedarikçiden Alım)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bağlantı / Evrak No *</label>
+                            <input type="text" id="form-baglanti" class="form-control" placeholder="Örn: 11013183" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Firma Seçin *</label>
+                            <select id="form-firma" class="form-control" onchange="App.onFirmaSelectChange()" required></select>
+                            <input type="text" id="form-yeni-firma" class="form-control" placeholder="Yeni Firma Adını Yazın" style="display:none; margin-top:0.5rem;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">İşlem / Sipariş Tarihi *</label>
+                            <input type="date" id="form-tarih" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Ödeme Vade Tarihi *</label>
+                            <input type="date" id="form-vade" class="form-control" required>
+                        </div>
+                        <div class="form-group" id="form-finans-group" style="display:none;">
+                            <label class="form-label">Finansman Türü</label>
+                            <select id="form-finans-turu" class="form-control" onchange="App.onFinansTuruChange()">
+                                <option value="Açık Hesap">Açık Hesap (Tedarikçi Borcu)</option>
+                                <option value="Mürabaha">Katılım Mürabaha Kredisi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mürabaha Detay Alanları -->
+                    <div id="form-murabaha-details" style="display:none; border-top:1px dashed var(--border-glass); padding-top:1rem; margin-top:1rem;">
+                        <h4 style="font-family:var(--font-heading); font-size:0.9rem; margin-bottom:0.75rem; color:var(--accent-cyan);">Mürabaha Kredi Detayları</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Finansman Bankası</label>
+                                <select id="form-mura-banka" class="form-control"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Banka Kâr Payı Tutarı (₺)</label>
+                                <input type="number" step="0.01" id="form-mura-kar" class="form-control" placeholder="0.00" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 📦 Sipariş Edilen Demir Kalemleri (Çoklu Satır Girişi) -->
+                    <div style="border-top:1px solid var(--border-glass); padding-top:1rem; margin-top:1rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                            <h4 style="font-family:var(--font-heading); font-size:0.95rem; color:var(--accent-cyan); margin:0;">Sipariş Edilen Ürün Kalemleri</h4>
+                            <button type="button" class="btn btn-secondary" style="padding:0.35rem 0.75rem; font-size:0.75rem;" onclick="App.addOrderItemRow()">
+                                <i data-lucide="plus-circle" style="width:12px; height:12px; margin-right:4px;"></i> Kalem Ekle
+                            </button>
+                        </div>
+                        
+                        <div style="overflow-x:auto;">
+                            <table class="data-grid" style="font-size:0.85rem; margin-bottom:1rem; border:1px solid var(--border-glass);">
+                                <thead>
+                                    <tr>
+                                        <th style="width:250px;">Ürün Tanımı / Demir Çapı</th>
+                                        <th style="width:120px;">Miktar (Kg)</th>
+                                        <th style="width:120px;">Ton Fiyatı (₺)</th>
+                                        <th style="width:100px;">KDV Oranı</th>
+                                        <th style="width:100px;">Tevkifat</th>
+                                        <th style="width:120px;">Matrah (₺)</th>
+                                        <th style="width:120px;">Cari Tutar (₺)</th>
+                                        <th style="width:40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="order-items-body">
+                                    <!-- Satırlar JS ile buraya eklenecektir -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Toplam Gösterge Paneli -->
+                        <div class="glass-panel" style="padding:1rem; background:rgba(255,255,255,0.01); display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem; margin-top:1rem; border-color:var(--border-glass);">
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--text-secondary);">TOPLAM MATRAH</div>
+                                <div id="summary-matrah" style="font-size:1.1rem; font-weight:700; color:var(--text-primary); margin-top:0.25rem;">0,00 ₺</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--text-secondary);">TOPLAM TEVKİFAT KDV (5/10)</div>
+                                <div id="summary-tevkifat" style="font-size:1.1rem; font-weight:700; color:var(--status-yellow); margin-top:0.25rem;">0,00 ₺</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--text-secondary);">TOPLAM CARİ YEKÜN (ÖDENECEK)</div>
+                                <div id="summary-yekun" style="font-size:1.1rem; font-weight:700; color:var(--accent-cyan); margin-top:0.25rem;">0,00 ₺</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top:1.5rem;">
+                        <i data-lucide="check"></i> Siparişi Kaydet &amp; Envanter/Cariye İşle
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📄 SİPARİŞ DETAY MODALI -->
+    <div id="detail-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Sipariş Formu Detayı</h3>
+                <button class="modal-close" onclick="App.closeDetailModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" id="detail-modal-body">
+                <!-- JS tarafından doldurulacak -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Uygulama JS Dosyaları -->
+    <script src="js/db.js"></script>
+    <script src="js/users.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/cari.js"></script>
+    <script src="js/bank.js"></script>
+    <script src="js/stock.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- PWA Service Worker Kayıt Scripti -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('PWA Service Worker Kayıtlı!', reg))
+                    .catch(err => console.error('PWA Kayıt Hatası:', err));
+            });
+        }
+    </script>
+</body>
+</html>
