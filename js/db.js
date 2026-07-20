@@ -228,6 +228,18 @@ const DBService = {
             const cariHars = await this.getCariHareketler();
             const stokHars = await this.getStokHareketleri();
 
+            // 0. Ölü/Geçersiz ID İçeren Hareketleri Veritabanından Temizle
+            for (let h of cariHars) {
+                if (h.cariId && !cariler.some(c => c.id === h.cariId)) {
+                    await this.deleteCariHareket(h.id);
+                }
+            }
+            for (let h of stokHars) {
+                if (h.urunId && !stoklar.some(u => u.id === h.urunId)) {
+                    await db.collection("erp_stok_hareketler").doc(h.id).delete();
+                }
+            }
+
             // 1. İlişkisel ID Eşleştirmesi ve Olmayan Kartları Oluşturma
             for (let s of siparisler) {
                 let updated = false;
@@ -316,8 +328,8 @@ const DBService = {
                     }
                 }
 
-                // 2.B: Cari Hareket Kontrolü (Bağlantı başına tek bir net borç/alacak hareketi)
-                const hasCariH = cariHars.some(h => h.aciklama && h.aciklama.includes(bNo));
+                // 2.B: Cari Hareket Kontrolü (Cari ID'si ve Açıklaması eşleşen hareket var mı?)
+                const hasCariH = cariHars.some(h => h.aciklama && h.aciklama.includes(bNo) && h.cariId === ilkKalem.cariId);
                 if (!hasCariH && ilkKalem.cariId) {
                     const toplamYekun = kalemler.reduce((sum, s) => sum + (s.tutar || 0), 0);
                     const urunOzet = kalemler.map(s => `${s.miktar} kg ${s.urunTanimi}`).join(', ');
