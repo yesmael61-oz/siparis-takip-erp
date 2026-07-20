@@ -46,7 +46,8 @@ const App = {
             await DBService.selfHealDatabase();
             
             // 🔔 GERÇEK ZAMANLI SENKRONİZASYON (Real-time Sync)
-            db.collection("erp_siparisler").onSnapshot(() => {
+            db.collection("erp_siparisler").onSnapshot(async () => {
+                await DBService.selfHealDatabase();
                 this.handleRouting();
             });
         } catch (error) {

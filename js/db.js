@@ -217,9 +217,11 @@ const DBService = {
         return await db.collection("erp_stok_hareketler").add(hareket);
     },
 
+    isHealing: false,
     // 🔄 MİGRASYON & ONARIM MOTORU (Self-Healing Database)
     async selfHealDatabase() {
-        if (!db) return;
+        if (!db || this.isHealing) return;
+        this.isHealing = true;
         try {
             console.log("Veritabanı onarım ve eşleştirme motoru başlatıldı...");
             const siparisler = await this.getSiparisler();
@@ -349,6 +351,8 @@ const DBService = {
             console.log("Veritabanı onarım ve eşleştirme işlemi tamamlandı.");
         } catch (e) {
             console.error("Self-heal veritabanı onarım hatası:", e);
+        } finally {
+            this.isHealing = false;
         }
     }
 };
