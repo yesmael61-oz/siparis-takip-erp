@@ -248,7 +248,7 @@ const UserManager = {
             avatar: avatar
         };
 
-        await db.collection("kullanicilar").add(newUser);
+        await db.collection("erp_kullanicilar").add(newUser);
         App.showToast("Yeni kullanıcı profil tanımlaması yapıldı!");
         
         document.getElementById("add-user-form").reset();
@@ -267,7 +267,7 @@ const UserManager = {
         }
 
         if (confirm(`"${target.kullaniciAdi}" isimli kullanıcıyı silmek istediğinize emin misiniz?`)) {
-            await db.collection("kullanicilar").doc(id).delete();
+            await db.collection("erp_kullanicilar").doc(id).delete();
             App.showToast("Kullanıcı profil kaydı başarıyla silindi.");
             this.renderUserManagement();
         }
