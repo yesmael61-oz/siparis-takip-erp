@@ -3,6 +3,30 @@ const UserManager = {
     currentUser: null,
 
     async init() {
+        // 🚀 GÜNCELLEME KONTROLÜ (İsmail Yıldırım hariç diğer kullanıcıları oturumdan düşürme)
+        const CURRENT_VERSION = "v15";
+        const savedVersion = localStorage.getItem("app_version");
+        if (savedVersion !== CURRENT_VERSION) {
+            const savedUserId = localStorage.getItem("aktif_kullanici_id");
+            if (savedUserId) {
+                const cached = localStorage.getItem("cached_users_list");
+                if (cached) {
+                    try {
+                        const users = JSON.parse(cached);
+                        const user = users.find(u => u.id === savedUserId);
+                        if (user && user.kullaniciAdi !== "İsmail Yıldırım") {
+                            localStorage.removeItem("aktif_kullanici_id");
+                        }
+                    } catch (e) {
+                        localStorage.removeItem("aktif_kullanici_id");
+                    }
+                } else {
+                    localStorage.removeItem("aktif_kullanici_id");
+                }
+            }
+            localStorage.setItem("app_version", CURRENT_VERSION);
+        }
+
         // ⚡ Hızlı Yükleme: Önce yerel hafızadaki son başarılı kullanıcı listesini yükle (Gecikmeyi önler)
         const cached = localStorage.getItem("cached_users_list");
         if (cached) {
