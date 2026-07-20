@@ -1,5 +1,5 @@
 // 🛠️ Service Worker - Çevrimdışı Çalışma ve Hızlı Yükleme Desteği
-const CACHE_NAME = 'siparis-takip-erp-v14';
+const CACHE_NAME = 'siparis-takip-erp-v16';
 const ASSETS = [
   './',
   './index.html',
