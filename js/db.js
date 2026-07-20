@@ -1,11 +1,10 @@
-// 🔥 Firebase Firestore Konfigürasyonu (db.js)
 const firebaseConfig = {
-    apiKey: "AIzaSyDjG5L5fWZ5qh6vplIeXjm-Ga1Da8Lp6eI",
-    authDomain: "siparis-takip-b5806.firebaseapp.com",
-    projectId: "siparis-takip-b5806",
-    storageBucket: "siparis-takip-b5806.firebasestorage.app",
-    messagingSenderId: "164470805717",
-    appId: "1:164470805717:web:4bd334a3d042fc88923e5c"
+    apiKey: "AIzaSyDSp705hKlnOQlHDmrrNFEyQSC0nWvCUGc",
+    authDomain: "siparis-takip-18073.firebaseapp.com",
+    projectId: "siparis-takip-18073",
+    storageBucket: "siparis-takip-18073.firebasestorage.app",
+    messagingSenderId: "231850869514",
+    appId: "1:231850869514:web:37f825249f42279135b0f3"
 };
 
 // Firebase Başlatma
