@@ -41,9 +41,12 @@ const App = {
 
             // İlk verileri oluştur (Eğer boşsa)
             await OrdersModule.seedDataIfEmpty();
+
+            // 🔄 Otomatik veri eşleştirme ve onarım motorunu çalıştır
+            await DBService.selfHealDatabase();
             
             // 🔔 GERÇEK ZAMANLI SENKRONİZASYON (Real-time Sync)
-            db.collection("siparisler").onSnapshot(() => {
+            db.collection("erp_siparisler").onSnapshot(() => {
                 this.handleRouting();
             });
         } catch (error) {
@@ -692,6 +695,9 @@ const App = {
                         }
                     }
                 }
+
+                // 3. Veritabanını Onar ve İlişkileri Kur
+                await DBService.selfHealDatabase();
 
                 this.showToast("Yedek başarıyla yüklendi! Sayfa güncelleniyor...");
                 setTimeout(() => {

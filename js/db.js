@@ -215,5 +215,126 @@ const DBService = {
     async addStokHareket(hareket) {
         if (!db) return;
         return await db.collection("erp_stok_hareketler").add(hareket);
+    },
+
+    // 🔄 MİGRASYON & ONARIM MOTORU (Self-Healing Database)
+    async selfHealDatabase() {
+        if (!db) return;
+        try {
+            console.log("Veritabanı onarım ve eşleştirme motoru başlatıldı...");
+            const siparisler = await this.getSiparisler();
+            const cariler = await this.getCariler();
+            const stoklar = await this.getStokKartlari();
+            const cariHars = await this.getCariHareketler();
+            const stokHars = await this.getStokHareketleri();
+
+            // 1. İlişkisel ID Eşleştirmesi ve Olmayan Kartları Oluşturma
+            for (let s of siparisler) {
+                let updated = false;
+
+                // Cari Kart Eşleştirme / Oluşturma
+                if (!s.cariId && s.firmaAdi) {
+                    const normalizedFirma = s.firmaAdi.trim();
+                    let cari = cariler.find(c => c.unvan.toLowerCase() === normalizedFirma.toLowerCase());
+                    if (!cari) {
+                        // Yeni cari kart aç
+                        const newCari = {
+                            unvan: normalizedFirma,
+                            telefon: "",
+                            tip: s.islemTuru === "Satış" ? "Müşteri" : "Tedarikçi",
+                            bakiye: 0
+                        };
+                        const res = await this.addCari(newCari);
+                        newCari.id = res.id;
+                        cariler.push(newCari);
+                        cari = newCari;
+                    }
+                    s.cariId = cari.id;
+                    updated = true;
+                }
+
+                // Stok Kart Eşleştirme / Oluşturma
+                if (!s.urunId && s.urunTanimi) {
+                    const normalizedUrun = s.urunTanimi.trim();
+                    let stok = stoklar.find(u => u.urunAdi.toLowerCase() === normalizedUrun.toLowerCase());
+                    if (!stok) {
+                        // Yeni stok kartı aç
+                        const newStok = {
+                            urunAdi: normalizedUrun,
+                            birim: "kg",
+                            baslangicMiktar: 0,
+                            baslangicMaliyet: 0,
+                            miktar: 0,
+                            ortalamaMaliyet: 0
+                        };
+                        const res = await this.addStokKarti(newStok);
+                        newStok.id = res.id;
+                        stoklar.push(newStok);
+                        stok = newStok;
+                    }
+                    s.urunId = stok.id;
+                    updated = true;
+                }
+
+                if (updated) {
+                    await this.updateSiparis(s.id, { cariId: s.cariId, urunId: s.urunId });
+                }
+            }
+
+            // 2. Eksik Stok ve Cari Hareketleri Yeniden İnşa Etme
+            // Bağlantı bazında siparişleri gruplayalım
+            const gruplar = {};
+            siparisler.forEach(s => {
+                if (s.baglantiNo) {
+                    if (!gruplar[s.baglantiNo]) {
+                        gruplar[s.baglantiNo] = [];
+                    }
+                    gruplar[s.baglantiNo].push(s);
+                }
+            });
+
+            for (let bNo in gruplar) {
+                const kalemler = gruplar[bNo];
+                const ilkKalem = kalemler[0];
+
+                // 2.A: Stok Hareketleri Kontrolü (Her sipariş kalemi için bir stok hareketi olmalı)
+                for (let s of kalemler) {
+                    const hasStokH = stokHars.some(h => h.aciklama && h.aciklama.includes(s.baglantiNo) && h.urunId === s.urunId);
+                    if (!hasStokH && s.urunId) {
+                        const newStokH = {
+                            urunId: s.urunId,
+                            hareketTipi: s.islemTuru === "Satış" ? "Çıkış" : "Giriş",
+                            miktar: s.miktar || 0,
+                            birimFiyat: (s.tonFiyati || 0) / 1000,
+                            tarih: s.siparisTarihi || new Date().toISOString().split('T')[0],
+                            aciklama: `${s.baglantiNo} No'lu Sipariş Bağlantısı`
+                        };
+                        await this.addStokHareket(newStokH);
+                        stokHars.push(newStokH);
+                    }
+                }
+
+                // 2.B: Cari Hareket Kontrolü (Bağlantı başına tek bir net borç/alacak hareketi)
+                const hasCariH = cariHars.some(h => h.aciklama && h.aciklama.includes(bNo));
+                if (!hasCariH && ilkKalem.cariId) {
+                    const toplamYekun = kalemler.reduce((sum, s) => sum + (s.tutar || 0), 0);
+                    const urunOzet = kalemler.map(s => `${s.miktar} kg ${s.urunTanimi}`).join(', ');
+
+                    const newCariH = {
+                        cariId: ilkKalem.cariId,
+                        tarih: ilkKalem.siparisTarihi || new Date().toISOString().split('T')[0],
+                        tur: ilkKalem.islemTuru === "Satış" ? "Satış" : "Alım",
+                        borcAlacak: ilkKalem.islemTuru === "Satış" ? "Borç" : "Alacak",
+                        tutar: toplamYekun,
+                        aciklama: `${bNo} No'lu ${ilkKalem.islemTuru} Bağlantısı (${urunOzet})`
+                    };
+                    await this.addCariHareket(newCariH);
+                    cariHars.push(newCariH);
+                }
+            }
+            console.log("Veritabanı onarım ve eşleştirme işlemi tamamlandı.");
+        } catch (e) {
+            console.error("Self-heal veritabanı onarım hatası:", e);
+        }
     }
 };
