@@ -233,7 +233,8 @@ const DBService = {
                 let updated = false;
 
                 // Cari Kart Eşleştirme / Oluşturma
-                if (!s.cariId && s.firmaAdi) {
+                const cariExists = s.cariId ? cariler.some(c => c.id === s.cariId) : false;
+                if ((!s.cariId || !cariExists) && s.firmaAdi) {
                     const normalizedFirma = s.firmaAdi.trim();
                     let cari = cariler.find(c => c.unvan.toLowerCase() === normalizedFirma.toLowerCase());
                     if (!cari) {
@@ -254,7 +255,8 @@ const DBService = {
                 }
 
                 // Stok Kart Eşleştirme / Oluşturma
-                if (!s.urunId && s.urunTanimi) {
+                const stokExists = s.urunId ? stoklar.some(u => u.id === s.urunId) : false;
+                if ((!s.urunId || !stokExists) && s.urunTanimi) {
                     const normalizedUrun = s.urunTanimi.trim();
                     let stok = stoklar.find(u => u.urunAdi.toLowerCase() === normalizedUrun.toLowerCase());
                     if (!stok) {
